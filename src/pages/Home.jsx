@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
+import { Shield, DollarSign } from "lucide-react";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 import FeatureCard from "../components/FeatureCard";
 import "../styles/home.css";
-import { Shield, DollarSign } from "lucide-react";
 
 export default function Home() {
   return (
@@ -31,8 +32,13 @@ export default function Home() {
         </section>
 
         <section className="home-actions">
-          <Button>Sign Up</Button>
-          <Button variant="secondary">Log In</Button>
+          <Link to="/signup">
+            <Button>Sign Up</Button>
+          </Link>
+
+          <Link to="/login">
+            <Button variant="secondary">Log In</Button>
+          </Link>
         </section>
       </main>
 

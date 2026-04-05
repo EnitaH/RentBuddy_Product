@@ -1,0 +1,112 @@
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-top: 24px;
+}
+
+.auth-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #667085;
+  font-size: 14px;
+}
+
+.auth-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.auth-content h1 {
+  font-size: 32px;
+  line-height: 38px;
+  color: #6e6345;
+}
+
+.auth-content p {
+  font-size: 14px;
+  color: #667085;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+}
+
+.input-group input,
+.input-group select {
+  height: 44px;
+  border: 1px solid #d6d0c6;
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #f1ece5;
+  outline: none;
+  font-size: 14px;
+  color: #475467;
+}
+
+.password-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-link {
+  font-size: 12px;
+  color: #667085;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #667085;
+}
+
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #667085;
+  line-height: 1.5;
+}
+
+.terms-row a {
+  color: #667085;
+  text-decoration: underline;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  font-weight: 600;
+}
