@@ -24,6 +24,10 @@ export default function Profile() {
     navigate("/");
   }
 
+  function goToBrowse(){
+    navigate("/browse");
+  }
+
   return (
     <div className="page-container profile-page">
       <header className="profile-header">
@@ -71,7 +75,7 @@ export default function Profile() {
       <section className="section-block">
         <h3>Quick Actions</h3>
 
-        <div className="action-card">
+        <div className="action-card" onClick={goToBrowse}>
           <div className="action-icon">
             <Search size={18} />
           </div>

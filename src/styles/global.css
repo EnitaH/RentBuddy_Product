@@ -25,14 +25,20 @@ body {
 }
 
 .logo-icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 8px;
   background: #e8dfd1;
   color: #7a6d45;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.logo-icon img{
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .logo-text {
