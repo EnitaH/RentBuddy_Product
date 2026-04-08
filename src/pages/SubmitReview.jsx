@@ -57,7 +57,8 @@ export default function SubmitReview() {
       title: "Unknown Property",
     };
 
-  const savedUser = JSON.parse(localStorage.getITem("user"));
+  const savedUserRaw = localStorage.getItem("user");
+  const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
   const userName = savedUser?.fullName || "Verified Tenant";
 
   const [postAnonymously, setPostAnonymously] = useState(true);

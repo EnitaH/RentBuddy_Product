@@ -2,6 +2,8 @@ import { User, LogOut, MapPin, Search, Star, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
+import { useEffect, useState } from "react";
+import { getSavedProperties } from "../utils/savedPropertiesStore";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -14,10 +16,18 @@ export default function Profile() {
     location: "Birmingham",
     memberSince: "Jan 2026",
     reviewsWritten: 3,
-    savedProperties: 5,
+    savedProperties: savedCount,
   };
 
   const firstLetter = user.fullName?.charAt(0)?.toUpperCase() || "U";
+
+  const [savedCount, setSavedCount] = useState(0);
+
+  useEffect(() => {
+    setSavedCount(getSavedProperties().length);
+  }, []);
+
+  const displayedSavedCount = savedCount;
 
   function handleLogout() {
     localStorage.removeItem("isLoggedIn");
@@ -66,7 +76,7 @@ export default function Profile() {
           </div>
 
           <div className="stat-item">
-            <strong>{user.savedProperties}</strong>
+            <strong>{displayedSavedCount}</strong>
             <span>Saved Properties</span>
           </div>
         </div>
@@ -95,7 +105,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="action-card">
+        <div className="action-card" onClick={() => navigate("/saved-properties")}>
           <div className="action-icon light">
             <Bookmark size={18} />
           </div>

@@ -18,6 +18,10 @@
   gap: 10px;
 }
 
+.saved-heart-btn {
+  color: #6e6345;
+}
+
 .details-image-wrap {
   position: relative;
   border-radius: 14px;

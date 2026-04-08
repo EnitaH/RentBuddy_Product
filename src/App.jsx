@@ -13,7 +13,7 @@ import MessageSent from "./pages/MessageSent";
 import PropertyReviews from "./pages/PropertyReviews";
 import SubmitReview from "./pages/SubmitReview";
 import ReviewSubmitted from "./pages/ReviewSubmitted";
-
+import SavedProperties from "./pages/SavedProperties";
 
 export default function App() {
   return (
@@ -62,6 +62,8 @@ export default function App() {
       <Route path="/property/:id/review/new" element={<SubmitReview/>} />
 
       <Route path="/review-submitted" element={<ReviewSubmitted />} />
+
+      <Route path="/saved-properties" element={<SavedProperties />}/>
     </Routes>
   );
 }
