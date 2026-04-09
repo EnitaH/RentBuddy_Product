@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-   "dev": "nodemon src/index.js",
-  "start": "node src/index.js"
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "seed:properties": "node db/seedProperties.js",
+    "seed:reviews": "node db/seedReviews.js"
   },
   "keywords": [],
   "author": "",

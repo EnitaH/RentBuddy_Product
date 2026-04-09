@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, Home, MapPin, User, Mail, Phone, Send } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { sendPropertyInquiry } from "../utils/propertyStore";
 import "../styles/contact-landlord.css";
 
 export default function ContactLandlord() {
@@ -8,6 +9,7 @@ export default function ContactLandlord() {
   const { state } = useLocation();
 
   const defaultProperty = {
+    id: null,
     title: "Modern Studio Apartment",
     address: "25 King Street, Aberdeen AB24 5RU",
     landlord: "Property Management",
@@ -18,10 +20,19 @@ export default function ContactLandlord() {
     ...(state?.property || {}),
   };
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const savedUserRaw = localStorage.getItem("user");
+  const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+
+  const [fullName, setFullName] = useState(
+    savedUser?.full_name || savedUser?.fullName || ""
+  );
+  const [email, setEmail] = useState(savedUser?.email || "");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState(`Hi, I'm interested in viewing ${property.title}.`);
+  const [message, setMessage] = useState(
+    `Hi, I'm interested in viewing ${property.title}.`
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const characterCount = message.length;
 
@@ -30,19 +41,46 @@ export default function ContactLandlord() {
     return property.landlord;
   }, [property.landlord]);
 
-  function handleSubmit(e) {
-  e.preventDefault();
+  async function handleSubmit(e) {
+    e.preventDefault();
 
-  navigate("/message-sent", {
-    state: {
-      property,
-      fullName,
-      email,
-      phone,
-      message,
-    },
-  });
-}
+    if (!property.id) {
+      setErrorMessage("Property information is missing.");
+      return;
+    }
+
+    if (!fullName.trim() || !email.trim() || !message.trim()) {
+      setErrorMessage("Please complete all required fields.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setErrorMessage("");
+
+      const result = await sendPropertyInquiry({
+        propertyId: property.id,
+        userId: savedUser?.id || null,
+        landlordName: managedByText,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        message: message.trim(),
+      });
+
+      navigate("/message-sent", {
+        state: {
+          property,
+          inquiry: result.inquiry,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to send inquiry:", error);
+      setErrorMessage(error.message || "Failed to send your message.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="page-container contact-page">
@@ -138,9 +176,11 @@ export default function ContactLandlord() {
 
         <small className="character-count">{characterCount} characters</small>
 
-        <button type="submit" className="primary-btn">
+        {errorMessage && <div className="submit-note">{errorMessage}</div>}
+
+        <button type="submit" className="primary-btn" disabled={submitting}>
           <Send size={16} />
-          <span>Send Message</span>
+          <span>{submitting ? "Sending..." : "Send Message"}</span>
         </button>
       </form>
 

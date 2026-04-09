@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ArrowLeft, Star } from "lucide-react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { addReviewToProperty, getPropertyById } from "../utils/propertyStore";
-import "../styles/submit-review.css";
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Star } from 'lucide-react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { addReviewToProperty, getPropertyById } from '../utils/propertyStore';
+import '../styles/submit-review.css';
 
 function StarRatingInput({ value, onChange }) {
   return (
@@ -16,7 +16,7 @@ function StarRatingInput({ value, onChange }) {
         >
           <Star
             size={22}
-            fill={star <= value ? "currentColor" : "none"}
+            fill={star <= value ? 'currentColor' : 'none'}
             strokeWidth={1.8}
           />
         </button>
@@ -50,16 +50,20 @@ export default function SubmitReview() {
   const { state } = useLocation();
   const { id } = useParams();
 
-  const property =
-    getPropertyById(id) ||
+  const [property, setProperty] = useState(
     state?.property || {
-      id,
-      title: "Unknown Property",
-    };
+      id: Number(id),
+      title: 'Loading property...',
+    }
+  );
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const savedUserRaw = localStorage.getItem("user");
+  const savedUserRaw = localStorage.getItem('user');
   const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
-  const userName = savedUser?.fullName || "Verified Tenant";
+  const userName = savedUser?.full_name || savedUser?.fullName || 'Verified Tenant';
+  const userId = savedUser?.id || null;
 
   const [postAnonymously, setPostAnonymously] = useState(true);
   const [overallRating, setOverallRating] = useState(0);
@@ -68,43 +72,96 @@ export default function SubmitReview() {
   const [cleanliness, setCleanliness] = useState(3);
   const [safety, setSafety] = useState(3);
   const [valueForMoney, setValueForMoney] = useState(3);
-  const [monthlyBills, setMonthlyBills] = useState("");
+  const [monthlyBills, setMonthlyBills] = useState('');
   const [hiddenCosts, setHiddenCosts] = useState(false);
-  const [reviewText, setReviewText] = useState("");
+  const [reviewText, setReviewText] = useState('');
   const [wouldRentAgain, setWouldRentAgain] = useState(true);
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    async function loadProperty() {
+      try {
+        setLoading(true);
+        setErrorMessage('');
+        const propertyData = await getPropertyById(id);
+        setProperty(propertyData);
+      } catch (error) {
+        console.error('Failed to load property for review:', error);
+        if (state?.property) {
+          setProperty(state.property);
+        } else {
+          setErrorMessage(error.message || 'Unable to load property.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProperty();
+  }, [id, state]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!overallRating || !reviewText.trim()) return;
+    if (!overallRating || !reviewText.trim()) {
+      setErrorMessage('Please add an overall rating and write your review.');
+      return;
+    }
 
-    const newReview = {
-      name: postAnonymously ? "Anonymous Tenant" : userName,
-      rating: overallRating,
-      date: new Date().toLocaleString("en-GB", {
-        month: "short",
-        year: "numeric",
-      }),
-      text: reviewText.trim(),
-      billsNote: monthlyBills.trim() ? `£${monthlyBills}/month` : "Included",
-      wouldRentAgain,
-      hiddenCosts: hiddenCosts ? "Reviewer reported additional hidden costs." : "",
-      categoryRatings: {
-        landlordCommunication,
-        maintenanceSpeed,
-        cleanliness,
-        safety,
-        valueForMoney,
-      },
-    };
+    try {
+      setSubmitting(true);
+      setErrorMessage('');
 
-    const updatedProperty = addReviewToProperty(property.id, newReview);
+      const payload = {
+        userId,
+        name: postAnonymously ? 'Anonymous Tenant' : userName,
+        rating: overallRating,
+        reviewText: reviewText.trim(),
+        monthlyBills: monthlyBills.trim(),
+        hiddenCosts,
+        wouldRentAgain,
+        categoryRatings: {
+          landlordCommunication,
+          maintenanceSpeed,
+          cleanliness,
+          safety,
+          valueForMoney,
+        },
+      };
 
-    navigate("/review-submitted", {
-    state: {
-        property: updatedProperty,
-    },
-    });
+      const result = await addReviewToProperty(property.id, payload);
+
+      navigate('/review-submitted', {
+        state: {
+          property,
+          review: result.review,
+          summary: result.summary,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      setErrorMessage(error.message || 'Failed to submit review.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="page-container submit-review-page">
+        <header className="submit-review-header">
+          <button className="back-btn" onClick={() => navigate(-1)}>
+            <ArrowLeft size={16} />
+          </button>
+          <h1>Submit Review</h1>
+          <div className="submit-review-spacer" />
+        </header>
+        <div className="submit-review-form">
+          <section className="submit-card">
+            <p>Loading property...</p>
+          </section>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -157,16 +214,8 @@ export default function SubmitReview() {
             value={maintenanceSpeed}
             onChange={setMaintenanceSpeed}
           />
-          <SliderField
-            label="Cleanliness"
-            value={cleanliness}
-            onChange={setCleanliness}
-          />
-          <SliderField
-            label="Safety"
-            value={safety}
-            onChange={setSafety}
-          />
+          <SliderField label="Cleanliness" value={cleanliness} onChange={setCleanliness} />
+          <SliderField label="Safety" value={safety} onChange={setSafety} />
           <SliderField
             label="Value for Money"
             value={valueForMoney}
@@ -190,14 +239,14 @@ export default function SubmitReview() {
           <div className="choice-row">
             <button
               type="button"
-              className={`choice-btn ${hiddenCosts ? "active" : ""}`}
+              className={`choice-btn ${hiddenCosts ? 'active' : ''}`}
               onClick={() => setHiddenCosts(true)}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`choice-btn ${!hiddenCosts ? "active" : ""}`}
+              className={`choice-btn ${!hiddenCosts ? 'active' : ''}`}
               onClick={() => setHiddenCosts(false)}
             >
               No
@@ -209,6 +258,7 @@ export default function SubmitReview() {
           <label className="submit-label">Your Review *</label>
           <textarea
             rows={6}
+            maxLength={500}
             placeholder="Tell us about your experience living here..."
             value={reviewText}
             onChange={(e) => setReviewText(e.target.value)}
@@ -221,14 +271,14 @@ export default function SubmitReview() {
           <div className="choice-row">
             <button
               type="button"
-              className={`choice-btn ${wouldRentAgain ? "active" : ""}`}
+              className={`choice-btn ${wouldRentAgain ? 'active' : ''}`}
               onClick={() => setWouldRentAgain(true)}
             >
               Yes
             </button>
             <button
               type="button"
-              className={`choice-btn ${!wouldRentAgain ? "active" : ""}`}
+              className={`choice-btn ${!wouldRentAgain ? 'active' : ''}`}
               onClick={() => setWouldRentAgain(false)}
             >
               No
@@ -236,12 +286,14 @@ export default function SubmitReview() {
           </div>
         </section>
 
+        {errorMessage && <div className="submit-note">{errorMessage}</div>}
+
         <div className="submit-note">
           All reviews are moderated to ensure authenticity and helpfulness. Your review will be visible within 24 hours.
         </div>
 
-        <button type="submit" className="submit-review-btn">
-          Submit Review
+        <button type="submit" className="submit-review-btn" disabled={submitting}>
+          {submitting ? 'Submitting...' : 'Submit Review'}
         </button>
       </form>
     </div>

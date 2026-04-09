@@ -1,80 +1,101 @@
-import { initialProperties } from "../data/propertiesData";
+const API_BASE_URL = "http://localhost:5000/api";
 
-const STORAGE_KEY = "rentbuddy_properties";
-
-function calculatePropertyStats(property) {
-  const reviews = Array.isArray(property.tenantReviews) ? property.tenantReviews : [];
-
-  if (!reviews.length) {
-    return {
-      ...property,
-      rating: property.rating || 0,
-      reviews: 0,
-    };
-  }
-
-  const average =
-    reviews.reduce((sum, review) => sum + (Number(review.rating) || 0), 0) /
-    reviews.length;
-
-  return {
-    ...property,
-    rating: Number(average.toFixed(1)),
-    reviews: reviews.length,
-  };
-}
-
-export function getProperties() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-
-  if (!saved) {
-    const enriched = initialProperties.map(calculatePropertyStats);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(enriched));
-    return enriched;
-  }
+async function handleJsonResponse(response, fallbackMessage) {
+  let data = null;
 
   try {
-    const parsed = JSON.parse(saved);
-    return parsed.map(calculatePropertyStats);
+    data = await response.json();
   } catch {
-    const enriched = initialProperties.map(calculatePropertyStats);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(enriched));
-    return enriched;
+    data = null;
   }
+
+  if (!response.ok) {
+    throw new Error(data?.message || fallbackMessage);
+  }
+
+  return data;
 }
 
-export function saveProperties(properties) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(properties));
+export async function getProperties() {
+  const response = await fetch(`${API_BASE_URL}/properties`);
+  return handleJsonResponse(response, "Failed to fetch properties");
 }
 
-export function getPropertyById(id) {
-  const properties = getProperties();
-  return properties.find((property) => String(property.id) === String(id));
+export async function getPropertyById(id) {
+  const response = await fetch(`${API_BASE_URL}/properties/${id}`);
+  return handleJsonResponse(response, "Failed to fetch property");
 }
 
-export function addReviewToProperty(propertyId, review) {
-  const properties = getProperties();
+export async function getPropertyReviews(id) {
+  const response = await fetch(`${API_BASE_URL}/properties/${id}/reviews`);
+  return handleJsonResponse(response, "Failed to fetch reviews");
+}
 
-  const updated = properties.map((property) => {
-    if (String(property.id) !== String(propertyId)) return property;
+export async function getReviewSummary(id) {
+  const response = await fetch(`${API_BASE_URL}/properties/${id}/reviews/summary`);
+  return handleJsonResponse(response, "Failed to fetch review summary");
+}
 
-    const currentReviews = Array.isArray(property.tenantReviews)
-      ? property.tenantReviews
-      : [];
-
-    const newReview = {
-      id: Date.now(),
-      ...review,
-    };
-
-    const updatedProperty = {
-      ...property,
-      tenantReviews: [newReview, ...currentReviews],
-    };
-
-    return calculatePropertyStats(updatedProperty);
+export async function addReviewToProperty(id, reviewPayload) {
+  const response = await fetch(`${API_BASE_URL}/properties/${id}/reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reviewPayload),
   });
 
-  saveProperties(updated);
-  return updated.find((property) => String(property.id) === String(propertyId));
+  return handleJsonResponse(response, "Failed to submit review");
+}
+
+export async function saveProperty(userId, propertyId) {
+  const response = await fetch(`${API_BASE_URL}/saved-properties`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId, propertyId }),
+  });
+
+  return handleJsonResponse(response, "Failed to save property");
+}
+
+export async function removeSavedProperty(userId, propertyId) {
+  const response = await fetch(`${API_BASE_URL}/saved-properties/${userId}/${propertyId}`, {
+    method: "DELETE",
+  });
+
+  return handleJsonResponse(response, "Failed to remove saved property");
+}
+
+export async function getSavedProperties(userId) {
+  const response = await fetch(`${API_BASE_URL}/saved-properties/${userId}`);
+  return handleJsonResponse(response, "Failed to fetch saved properties");
+}
+
+export async function checkSavedProperty(userId, propertyId) {
+  const response = await fetch(`${API_BASE_URL}/saved-properties/${userId}/${propertyId}`);
+  return handleJsonResponse(response, "Failed to check saved property");
+}
+
+export async function sendPropertyInquiry(payload) {
+  const response = await fetch(`${API_BASE_URL}/inquiries`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handleJsonResponse(response, "Failed to send inquiry");
+}
+
+export async function getUserInquiries(userId) {
+  const response = await fetch(`${API_BASE_URL}/inquiries/user/${userId}`);
+  return handleJsonResponse(response, "Failed to fetch user inquiries");
+}
+
+export async function getPropertyInquiries(propertyId) {
+  const response = await fetch(`${API_BASE_URL}/inquiries/property/${propertyId}`);
+  return handleJsonResponse(response, "Failed to fetch property inquiries");
 }

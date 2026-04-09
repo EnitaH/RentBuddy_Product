@@ -1,10 +1,13 @@
 import { CheckCircle2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/message-sent.css";
 
 export default function MessageSent() {
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  const propertyTitle = state?.property?.title || "this property";
 
   return (
     <div className="page-container message-sent-page">
@@ -20,21 +23,16 @@ export default function MessageSent() {
         <h1>Thank You for Sending a Message!</h1>
 
         <p>
-          Your contacted landlord will get back to you as soon as possible!
+          Your inquiry about <strong>{propertyTitle}</strong> has been sent successfully.
+          The landlord will get back to you as soon as possible.
         </p>
 
         <div className="message-actions">
-          <button
-            className="primary-btn"
-            onClick={() => navigate("/browse")}
-          >
+          <button className="primary-btn" onClick={() => navigate("/browse")}>
             Browse Properties
           </button>
 
-          <button
-            className="secondary-btn"
-            onClick={() => navigate("/profile")}
-          >
+          <button className="secondary-btn" onClick={() => navigate("/profile")}>
             Go to Dashboard
           </button>
         </div>
