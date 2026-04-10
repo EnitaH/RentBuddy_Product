@@ -14,6 +14,8 @@ import PropertyReviews from "./pages/PropertyReviews";
 import SubmitReview from "./pages/SubmitReview";
 import ReviewSubmitted from "./pages/ReviewSubmitted";
 import SavedProperties from "./pages/SavedProperties";
+import ProfileSettings from "./pages/ProfileSettings";
+import MyReviews from "./pages/MyReviews";
 
 export default function App() {
   return (
@@ -64,6 +66,10 @@ export default function App() {
       <Route path="/review-submitted" element={<ReviewSubmitted />} />
 
       <Route path="/saved-properties" element={<SavedProperties />}/>
+      
+      <Route path="/profile-settings" element={<ProfileSettings />} />
+
+      <Route path="/my-reviews" element={<MyReviews />}/>
     </Routes>
   );
 }

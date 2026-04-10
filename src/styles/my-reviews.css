@@ -1,0 +1,257 @@
+.my-reviews-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 0;
+}
+
+.my-reviews-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid #e6ded2;
+  gap: 10px;
+}
+
+.my-reviews-header-text {
+  text-align: center;
+}
+
+.my-reviews-header-text h1 {
+  margin: 0;
+  font-size: 16px;
+  color: #6e6345;
+}
+
+.my-reviews-header-text p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #98a2b3;
+}
+
+.my-reviews-toggle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f3eee7;
+  border-radius: 12px;
+  padding: 3px;
+}
+
+.my-reviews-toggle-btn {
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #6e6345;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.my-reviews-toggle-btn.active {
+  background: #ccb89f;
+  color: #ffffff;
+}
+
+.my-reviews-intro h2 {
+  margin: 0;
+  font-size: 15px;
+  color: #3f3725;
+}
+
+.my-reviews-intro p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #667085;
+}
+
+.review-property-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.review-property-card {
+  background: #ece5dc;
+  border: 1px solid #d8cec0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.review-property-image-wrap {
+  position: relative;
+}
+
+.review-property-image-wrap img,
+.review-property-image-placeholder {
+  width: 100%;
+  height: 118px;
+  display: block;
+  object-fit: cover;
+  background: #cba4df;
+}
+
+.review-rating-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #2d2432;
+  color: #f4d44d;
+  border-radius: 6px;
+  padding: 3px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.review-property-body {
+  padding: 12px;
+}
+
+.review-property-body h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #3f3725;
+}
+
+.review-property-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 11px;
+  color: #667085;
+  min-height: 34px;
+}
+
+.review-property-btn {
+  width: 100%;
+  margin-top: 12px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #7a6d45;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.my-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.my-review-card,
+.my-reviews-empty-card {
+  background: #ece5dc;
+  border: 1px solid #d8cec0;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.my-reviews-empty-card h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: #1d2939;
+}
+
+.my-reviews-empty-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #667085;
+}
+
+.my-review-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.my-review-top h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: #1d2939;
+}
+
+.my-review-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 11px;
+  color: #667085;
+}
+
+.my-review-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f6f0c8;
+  color: #6e6345;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 4px 7px;
+  flex-shrink: 0;
+}
+
+.my-review-rating svg {
+  color: #f4b400;
+}
+
+.my-review-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #98a2b3;
+}
+
+.my-review-text {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #344054;
+}
+
+.my-review-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+
+.my-review-bills {
+  color: #98a2b3;
+}
+
+.my-review-rent-again.yes {
+  color: #2ca35c;
+  font-weight: 600;
+}
+
+.my-review-rent-again.no {
+  color: #d64545;
+  font-weight: 600;
+}
+
+.my-review-view-btn {
+  margin-top: 12px;
+  width: 100%;
+  height: 36px;
+  border: 1px solid #ccb89f;
+  border-radius: 8px;
+  background: #e4d6c3;
+  color: #3f3725;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}

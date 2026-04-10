@@ -11,6 +11,7 @@ export default function Signup() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    location: "",
     password: "",
     confirmPassword: "",
     role: "",
@@ -36,6 +37,7 @@ export default function Signup() {
     if (
       !formData.fullName ||
       !formData.email ||
+      !formData.location ||
       !formData.password ||
       !formData.confirmPassword ||
       !formData.role
@@ -65,6 +67,7 @@ export default function Signup() {
         body: JSON.stringify({
           fullName: formData.fullName,
           email: formData.email,
+          location: formData.location,
           password: formData.password,
           role: formData.role,
         }),
@@ -123,6 +126,17 @@ export default function Signup() {
               name="email"
               placeholder="your.email@example.com"
               value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Location</label>
+            <input
+              type="text"
+              name="location"
+              placeholder="Enter your town"
+              value={formData.location}
               onChange={handleChange}
             />
           </div>

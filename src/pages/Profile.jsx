@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
 import { getSavedProperties } from "../utils/savedPropertiesStore";
+import { getReviewsByUser } from "../utils/propertyStore";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -27,8 +28,22 @@ export default function Profile() {
   const displayName = user.full_name || user.fullName || "Unknown User";
   const memberSince = user.member_since || user.memberSince || "Jan 2026";
   const location = user.location || "Birmingham";
-  const reviewsWritten = user.reviewsWritten || 3;
+  //const reviewsWritten = user.reviewsWritten || 3;
   const firstLetter = displayName.charAt(0).toUpperCase();
+
+  const [reviewCount, setReviewCount] = useState(0);
+
+  useEffect(() => {
+    const savedUserRaw = localStorage.getItem("user");
+    const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+
+    const reviews = getReviewsByUser(
+      savedUser?.email || "",
+      savedUser?.fullName || ""
+    );
+
+    setReviewCount(reviews.length);
+  }, []);
 
   function handleLogout() {
     localStorage.removeItem("isLoggedIn");
@@ -44,7 +59,12 @@ export default function Profile() {
       <header className="profile-header">
         <Logo />
         <div className="profile-header-icons">
-          <User size={18} />
+          <button
+            className="icon-button"
+            onClick={() => navigate("/profile-settings")}
+          >
+            <User size={18} />
+          </button>
           <button className="icon-button" onClick={handleLogout}>
             <LogOut size={18} />
           </button>
@@ -72,7 +92,7 @@ export default function Profile() {
 
         <div className="profile-stats">
           <div className="stat-item">
-            <strong>{reviewsWritten}</strong>
+            <strong>{reviewCount}</strong>
             <span>Reviews Written</span>
           </div>
 
@@ -96,7 +116,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="action-card">
+        <div className="action-card" onClick={() => navigate("/my-reviews")}>
           <div className="action-icon">
             <Star size={18} />
           </div>

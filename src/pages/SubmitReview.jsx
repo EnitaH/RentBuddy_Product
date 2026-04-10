@@ -63,7 +63,7 @@ export default function SubmitReview() {
   const savedUserRaw = localStorage.getItem('user');
   const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
   const userName = savedUser?.full_name || savedUser?.fullName || 'Verified Tenant';
-  const userId = savedUser?.id || null;
+  //const userId = savedUser?.id || null;
 
   const [postAnonymously, setPostAnonymously] = useState(true);
   const [overallRating, setOverallRating] = useState(0);
@@ -112,13 +112,21 @@ export default function SubmitReview() {
       setErrorMessage('');
 
       const payload = {
-        userId,
-        name: postAnonymously ? 'Anonymous Tenant' : userName,
+        name: postAnonymously ? "Anonymous Tenant" : userName,
+        authorName: userName,
+        authorEmail: savedUser?.email || "",
+        isAnonymous: postAnonymously,
+        propertyId: property.id,
+        propertyTitle: property.title,
         rating: overallRating,
-        reviewText: reviewText.trim(),
-        monthlyBills: monthlyBills.trim(),
-        hiddenCosts,
+        date: new Date().toLocaleString("en-GB", {
+          month: "short",
+          year: "numeric",
+        }),
+        text: reviewText.trim(),
+        billsNote: monthlyBills.trim() ? `£${monthlyBills}/month` : "Included",
         wouldRentAgain,
+        hiddenCosts: hiddenCosts ? "Reviewer reported additional hidden costs." : "",
         categoryRatings: {
           landlordCommunication,
           maintenanceSpeed,

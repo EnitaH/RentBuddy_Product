@@ -99,3 +99,33 @@ export async function getPropertyInquiries(propertyId) {
   const response = await fetch(`${API_BASE_URL}/inquiries/property/${propertyId}`);
   return handleJsonResponse(response, "Failed to fetch property inquiries");
 }
+
+export function getReviewsByUser(userEmail, userName) {
+  const properties = getProperties();
+
+  const reviews = [];
+
+  properties.forEach((property) => {
+    const propertyReviews = Array.isArray(property.tenantReviews)
+      ? property.tenantReviews
+      : [];
+
+    propertyReviews.forEach((review) => {
+      const matchesUser =
+        (userEmail && review.authorEmail === userEmail) ||
+        (userName && review.authorName === userName);
+
+      if (matchesUser) {
+        reviews.push({
+          ...review,
+          propertyId: property.id,
+          propertyTitle: property.title,
+          propertyImage: property.image,
+          propertyAddress: property.address,
+        });
+      }
+    });
+  });
+
+  return reviews.sort((a, b) => (b.id || 0) - (a.id || 0));
+}
