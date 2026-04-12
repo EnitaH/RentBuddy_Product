@@ -37,27 +37,13 @@ export async function getReviewSummary(id) {
 }
 
 export async function addReviewToProperty(id, reviewPayload) {
-  const formData = new FormData();
-
-  Object.entries(reviewPayload).forEach(([key, value]) => {
-    if (key === "photos") return;
-    if (key === "categoryRatings") {
-      formData.append("categoryRatings", JSON.stringify(value));
-      return;
-    }
-
-    formData.append(key, value ?? "");
-  });
-
-  if (Array.isArray(reviewPayload.photos)) {
-    reviewPayload.photos.forEach((file) => {
-      formData.append("photos", file);
-    });
-  }
-
+  
   const response = await fetch(`${API_BASE_URL}/properties/${id}/reviews`, {
     method: "POST",
-    body: formData,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reviewPayload),
   });
 
   return handleJsonResponse(response, "Failed to submit review");
@@ -143,4 +129,61 @@ export async function getReviewsByUser(userEmail, userName) {
   });
 
   return reviews.sort((a, b) => (b.id || 0) - (a.id || 0));
+}
+
+export async function updateUser(userId, payload) {
+  const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update user");
+  }
+
+  return data;
+}
+
+export async function updateUserPassword(userId, payload) {
+  const response = await fetch(`${API_BASE_URL}/users/${userId}/password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to update password");
+  }
+
+  return data;
+}
+
+export async function getUserReviews(userId) {
+  const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch reviews");
+  }
+
+  return data.reviews;
+}
+export async function deleteReview(reviewId, propertyId) {
+  const response = await fetch(
+    `${API_BASE_URL}/properties/${propertyId}/reviews/${reviewId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  return handleJsonResponse(response, "Failed to delete review");
 }

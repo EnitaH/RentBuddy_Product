@@ -154,75 +154,62 @@ function handlePhotoChange(e) {
   }, [photoPreviews]);
 
   async function handleSubmit(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!overallRating || !reviewText.trim()) {
-      setErrorMessage('Please add an overall rating and write your review.');
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      setErrorMessage('');
-
-      const uploadedPhotos =
-        photoFiles.length > 0
-          ? await Promise.all(
-              photoFiles.map(async (file) => ({
-                name: file.name,
-                type: file.type,
-                url: await fileToDataUrl(file),
-              }))
-            )
-          : [];
-
-      const payload = {
-        name: postAnonymously ? 'Anonymous Tenant' : userName,
-        authorName: userName,
-        authorEmail: savedUser?.email || '',
-        isAnonymous: postAnonymously,
-        propertyId: property.id,
-        propertyTitle: property.title,
-        rating: overallRating,
-        date: new Date().toLocaleString('en-GB', {
-          month: 'short',
-          year: 'numeric',
-        }),
-        text: reviewText.trim(),
-        billsNote: monthlyBills.trim() ? `£${monthlyBills}/month` : 'Included',
-        wouldRentAgain,
-        hiddenCosts: hiddenCosts ? 'Reviewer reported additional hidden costs.' : '',
-        
-        categoryRatings: {
-          landlordCommunication,
-          maintenanceSpeed,
-          cleanliness,
-          safety,
-          valueForMoney,
-        },
-      };
-
-      if (uploadedPhotos.length > 0) {
-        payload.photos = uploadedPhotos;
-      }
-
-      const result = await addReviewToProperty(property.id, payload);
-
-      navigate('/review-submitted', {
-        state: {
-          property,
-          review: result.review,
-          summary: result.summary,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to submit review:', error);
-      setErrorMessage(error.message || 'Failed to submit review.');
-    } finally {
-      setSubmitting(false);
-    }
+  if (!overallRating || !reviewText.trim()) {
+    setErrorMessage('Please add an overall rating and write your review.');
+    return;
   }
 
+  try {
+    setSubmitting(true);
+    setErrorMessage('');
+
+    const uploadedPhotos =
+      photoFiles.length > 0
+        ? await Promise.all(
+            photoFiles.map(async (file) => ({
+              name: file.name,
+              type: file.type,
+              url: await fileToDataUrl(file),
+            }))
+          )
+        : [];
+
+    const payload = {
+      userId: savedUser?.id || null,
+      name: postAnonymously ? 'Anonymous Tenant' : userName,
+      rating: overallRating,
+      reviewText: reviewText.trim(),
+      monthlyBills: monthlyBills.trim(),
+      hiddenCosts,
+      wouldRentAgain,
+      photos: uploadedPhotos,
+      categoryRatings: {
+        landlordCommunication,
+        maintenanceSpeed,
+        cleanliness,
+        safety,
+        valueForMoney,
+      },
+    };
+
+    const result = await addReviewToProperty(property.id, payload);
+
+    navigate('/review-submitted', {
+      state: {
+        property,
+        review: result.review,
+        summary: result.summary,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to submit review:', error);
+    setErrorMessage(error.message || 'Failed to submit review.');
+  } finally {
+    setSubmitting(false);
+  }
+}
   if (loading) {
     return (
       <div className="page-container submit-review-page">

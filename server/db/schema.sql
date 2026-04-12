@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   review_text TEXT NOT NULL,
   would_rent_again INTEGER DEFAULT 1,
   is_anonymous INTEGER DEFAULT 1,
+  review_photos TEXT DEFAULT '[]',
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (property_id) REFERENCES properties(id),
   FOREIGN KEY (user_id) REFERENCES users(id)

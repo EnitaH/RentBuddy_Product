@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from "react"; 
 import {
   ArrowLeft,
   User,
@@ -15,6 +15,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
 import "../styles/profile-settings.css";
+import { updateUser } from "../utils/propertyStore";
+import { updateUserPassword } from "../utils/propertyStore";
 
 export default function ProfileSettings() {
   const navigate = useNavigate();
@@ -24,17 +26,15 @@ export default function ProfileSettings() {
 
   const [activeSection, setActiveSection] = useState("account");
 
-  const [formData, setFormData] = useState({
-    fullName: savedUser?.fullName || "Sarah Johnson",
-    email: savedUser?.email || "sarah.j@university.ac.uk",
-    phone: savedUser?.phone || "+44 7700 900123",
-    location: savedUser?.location || "Birmingham",
-    bio:
-      savedUser?.bio ||
-      "University student looking for affordable rentals in Birmingham",
-    memberSince: savedUser?.memberSince || "Jan 2026",
-    profileImage: savedUser?.profileImage || "",
-  });
+ const [formData, setFormData] = useState({
+  fullName: savedUser?.full_name || savedUser?.fullName || "Sarah Johnson",
+  email: savedUser?.email || "sarah.j@university.ac.uk",
+  phone: savedUser?.phone || "",
+  location: savedUser?.location || "",
+  bio: savedUser?.bio || "",
+  memberSince: savedUser?.member_since || savedUser?.memberSince || "Jan 2026",
+  profileImage: savedUser?.profileImage || "",
+});
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -89,41 +89,76 @@ export default function ProfileSettings() {
       [name]: checked,
     }));
   }
+  async function handleSaveAccount() {
+  try {
+    if (!savedUser?.id) {
+      setMessage("User not found.");
+      return;
+    }
 
-  function handleSaveAccount() {
+    const result = await updateUser(savedUser.id, {
+      fullName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      location: formData.location,
+      bio: formData.bio,
+    });
+
     const updatedUser = {
       ...(savedUser || {}),
-      ...formData,
+      ...result.user,
+      phone: formData.phone,
+      bio: formData.bio,
+      profileImage: formData.profileImage,
       privacySettings: privacyData,
       notificationSettings: notificationData,
     };
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
     setMessage("Account information updated successfully.");
+  } catch (error) {
+    console.error("Update profile error:", error);
+    setMessage(error.message || "Failed to update account information.");
+  }
+}
+  async function handleSavePassword() {
+  if (
+    !passwordData.currentPassword ||
+    !passwordData.newPassword ||
+    !passwordData.confirmNewPassword
+  ) {
+    setMessage("Please fill in all password fields.");
+    return;
   }
 
-  function handleSavePassword() {
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmNewPassword
-    ) {
-      setMessage("Please fill in all password fields.");
+  if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+    setMessage("New passwords do not match.");
+    return;
+  }
+
+  try {
+    if (!savedUser?.id) {
+      setMessage("User not found.");
       return;
     }
 
-    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setMessage("New passwords do not match.");
-      return;
-    }
+    await updateUserPassword(savedUser.id, {
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
 
     setPasswordData({
       currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
     });
+
     setMessage("Password updated successfully.");
+  } catch (error) {
+    console.error(error);
+    setMessage(error.message || "Failed to update password.");
   }
+}
 
   function handleSavePrivacy() {
     const updatedUser = {

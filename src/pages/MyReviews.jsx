@@ -4,10 +4,9 @@ import {
   Star,
   MapPin,
   MessageSquare,
-  PenSquare,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getProperties, getReviewsByUser } from "../utils/propertyStore";
+import { getProperties, getUserReviews, deleteReview } from "../utils/propertyStore";
 import "../styles/my-reviews.css";
 
 export default function MyReviews() {
@@ -21,15 +20,37 @@ export default function MyReviews() {
   const [myReviews, setMyReviews] = useState([]);
 
   useEffect(() => {
-    const allProperties = getProperties();
-    setProperties(allProperties);
+    async function loadData() {
+      try {
+        const propertiesData = await getProperties();
+        setProperties(propertiesData);
 
-    const userReviews = getReviewsByUser(
-      savedUser?.email || "",
-      savedUser?.fullName || ""
-    );
-    setMyReviews(userReviews);
-  }, [savedUser?.email, savedUser?.fullName]);
+        if (!savedUser?.id) return;
+
+        const reviewsData = await getUserReviews(savedUser.id);
+        setMyReviews(reviewsData);
+      } catch (error) {
+        console.error("Failed to load My Reviews data:", error);
+      }
+    }
+
+    loadData();
+  }, [savedUser?.id]);
+
+  async function handleDeleteReview(reviewId, propertyId) {
+    try {
+      await deleteReview(reviewId, propertyId);
+
+      setMyReviews((prev) =>
+        prev.filter((review) => review.id !== reviewId)
+      );
+
+      const propertiesData = await getProperties();
+      setProperties(propertiesData);
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+    }
+  }
 
   const reviewCountText = useMemo(() => {
     if (myReviews.length === 1) return "1 review written";
@@ -147,7 +168,9 @@ export default function MyReviews() {
 
                 <div className="my-review-meta">
                   <span>{review.date}</span>
-                  <span>{review.isAnonymous ? "Posted anonymously" : "Posted with name"}</span>
+                  <span>
+                    {review.isAnonymous ? "Posted anonymously" : "Posted with name"}
+                  </span>
                 </div>
 
                 <p className="my-review-text">{review.text}</p>
@@ -182,6 +205,13 @@ export default function MyReviews() {
                 >
                   <MessageSquare size={13} />
                   <span>View Property Reviews</span>
+                </button>
+
+                <button
+                  className="my-review-delete-btn"
+                  onClick={() => handleDeleteReview(review.id, review.propertyId)}
+                >
+                  Delete Review
                 </button>
               </article>
             ))

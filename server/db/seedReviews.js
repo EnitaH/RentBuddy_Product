@@ -16,6 +16,7 @@ const insert = db.prepare(`
     review_text,
     would_rent_again,
     is_anonymous,
+    review_photos,
     created_at
   ) VALUES (
     @property_id,
@@ -31,6 +32,7 @@ const insert = db.prepare(`
     @review_text,
     @would_rent_again,
     @is_anonymous,
+    @review_photos,
     @created_at
   )
 `);
@@ -82,6 +84,7 @@ for (const property of propertiesSeed) {
       review_text: review.text || '',
       would_rent_again: review.wouldRentAgain ? 1 : 0,
       is_anonymous: (review.name || 'Anonymous Tenant') === 'Anonymous Tenant' ? 1 : 0,
+      review_photos: JSON.stringify(review.photos || []),
       created_at: toIsoDate(review.date, index),
     });
   });

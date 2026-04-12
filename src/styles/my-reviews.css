@@ -255,3 +255,14 @@
   gap: 6px;
   cursor: pointer;
 }
+.my-review-delete-btn {
+  margin-top: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f6dede;
+  color: #c94141;
+  cursor: pointer;
+  font-weight: 600;
+}

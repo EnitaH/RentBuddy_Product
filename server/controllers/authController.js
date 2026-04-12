@@ -3,8 +3,9 @@ const db = require("../db/database");
 
 function signup(req, res) {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, location, password, role } = req.body;
 
+    
     if (!fullName || !email || !password || !role) {
       return res.status(400).json({
         message: "All required fields must be provided.",
@@ -26,15 +27,16 @@ function signup(req, res) {
     const result = db
       .prepare(
         `
-        INSERT INTO users (full_name, email, password_hash, role)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO users (full_name, email, password_hash, role, location)
+        VALUES (?, ?, ?, ?, ?)
       `
       )
       .run(
         fullName.trim(),
         email.trim().toLowerCase(),
         passwordHash,
-        role.trim()
+        role.trim(),
+        location?.trim() || ""  
       );
 
     const newUser = db

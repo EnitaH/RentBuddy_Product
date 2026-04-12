@@ -4,45 +4,52 @@ import { useEffect, useState } from "react";
 import Logo from "../components/Logo";
 import "../styles/profile.css";
 import { getSavedProperties } from "../utils/savedPropertiesStore";
-import { getReviewsByUser } from "../utils/propertyStore";
+import { getUserReviews } from "../utils/propertyStore";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [savedCount, setSavedCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
-  useEffect(() => {
-    setSavedCount(getSavedProperties().length);
-  }, []);
-
-  const savedUser = JSON.parse(localStorage.getItem("user"));
+  const savedUserRaw = localStorage.getItem("user");
+  const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
 
   const user = savedUser || {
     fullName: "Sarah Johnson",
     email: "sarah.j@university.ac.uk",
     location: "Birmingham",
     memberSince: "Jan 2026",
-    reviewsWritten: 3,
-    
   };
 
   const displayName = user.full_name || user.fullName || "Unknown User";
   const memberSince = user.member_since || user.memberSince || "Jan 2026";
-  const location = user.location || "Birmingham";
-  //const reviewsWritten = user.reviewsWritten || 3;
+  const location = user.location || "";
   const firstLetter = displayName.charAt(0).toUpperCase();
 
-  const [reviewCount, setReviewCount] = useState(0);
+  useEffect(() => {
+    setSavedCount(getSavedProperties().length);
+  }, []);
 
   useEffect(() => {
-    const savedUserRaw = localStorage.getItem("user");
-    const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
+    async function loadReviewCount() {
+      try {
+        const savedUserRaw = localStorage.getItem("user");
+        const savedUser = savedUserRaw ? JSON.parse(savedUserRaw) : null;
 
-    const reviews = getReviewsByUser(
-      savedUser?.email || "",
-      savedUser?.fullName || ""
-    );
+        if (!savedUser?.id) {
+          setReviewCount(0);
+          return;
+        }
 
-    setReviewCount(reviews.length);
+        const reviews = await getUserReviews(savedUser.id);
+        setReviewCount(reviews.length);
+      } catch (error) {
+        console.error("Failed to load review count:", error);
+        setReviewCount(0);
+      }
+    }
+
+    loadReviewCount();
   }, []);
 
   function handleLogout() {

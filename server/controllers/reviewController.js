@@ -23,6 +23,15 @@ function formatReviewDate(input) {
   return date.toLocaleString("en-GB", { month: "short", year: "numeric" });
 }
 
+function safeParsePhotos(value) {
+  try {
+    const parsed = JSON.parse(value || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function mapReview(row) {
   return {
     id: row.id,
@@ -37,6 +46,8 @@ function mapReview(row) {
     hiddenCosts: row.hidden_costs
       ? "Reviewer reported additional hidden costs."
       : "",
+    isAnonymous: Boolean(row.is_anonymous),
+    photos: safeParsePhotos(row.review_photos),
     categoryRatings: {
       landlordCommunication: row.landlord_communication,
       maintenanceSpeed: row.maintenance_speed,
@@ -190,6 +201,7 @@ function createReview(req, res) {
       hiddenCosts = false,
       wouldRentAgain = true,
       categoryRatings = {},
+      photos = [],
     } = req.body;
 
     if (!name || !String(name).trim()) {
@@ -203,6 +215,8 @@ function createReview(req, res) {
     if (!rating) {
       return res.status(400).json({ message: "Overall rating is required." });
     }
+
+    const safePhotos = Array.isArray(photos) ? photos : [];
 
     const result = db
       .prepare(
@@ -220,8 +234,9 @@ function createReview(req, res) {
           hidden_costs,
           review_text,
           would_rent_again,
-          is_anonymous
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          is_anonymous,
+          review_photos
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         propertyId,
@@ -237,7 +252,8 @@ function createReview(req, res) {
         toBooleanFlag(hiddenCosts),
         String(reviewText).trim(),
         toBooleanFlag(wouldRentAgain),
-        toBooleanFlag(String(name).trim() === "Anonymous Tenant")
+        toBooleanFlag(String(name).trim() === "Anonymous Tenant"),
+        JSON.stringify(safePhotos)
       );
 
     const inserted = db.prepare("SELECT * FROM reviews WHERE id = ?").get(result.lastInsertRowid);
@@ -254,8 +270,78 @@ function createReview(req, res) {
   }
 }
 
+function getReviewsByUser(req, res) {
+  try {
+    const userId = Number(req.params.userId);
+
+    const rows = db
+      .prepare(
+        `
+        SELECT
+          r.*,
+          p.title AS property_title,
+          p.address AS property_address
+        FROM reviews r
+        JOIN properties p ON r.property_id = p.id
+        WHERE r.user_id = ?
+        ORDER BY datetime(r.created_at) DESC, r.id DESC
+        `
+      )
+      .all(userId);
+
+    const reviews = rows.map((row) => ({
+      id: row.id,
+      propertyId: row.property_id,
+      propertyTitle: row.property_title,
+      propertyAddress: row.property_address,
+      rating: row.overall_rating,
+      text: row.review_text,
+      date: formatReviewDate(row.created_at),
+      billsNote: row.monthly_bills ? `£${row.monthly_bills}/month` : "Included",
+      wouldRentAgain: Boolean(row.would_rent_again),
+      isAnonymous: Boolean(row.is_anonymous),
+      photos: safeParsePhotos(row.review_photos),
+    }));
+
+    return res.json({ reviews });
+  } catch (error) {
+    console.error("Get user reviews error:", error);
+    return res.status(500).json({
+      message: "Failed to fetch user reviews.",
+    });
+  }
+}
+
+function deleteReview(req, res) {
+  try {
+    const reviewId = Number(req.params.reviewId);
+
+    const review = db.prepare("SELECT * FROM reviews WHERE id = ?").get(reviewId);
+
+    if (!review) {
+      return res.status(404).json({
+        message: "Review not found.",
+      });
+    }
+
+    db.prepare("DELETE FROM reviews WHERE id = ?").run(reviewId);
+    syncPropertyAggregate(review.property_id);
+
+    return res.json({
+      message: "Review deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Delete review error:", error);
+    return res.status(500).json({
+      message: "Failed to delete review.",
+    });
+  }
+}
+
 module.exports = {
   getReviewsByProperty,
   getReviewSummary,
   createReview,
+  getReviewsByUser,
+  deleteReview,
 };
