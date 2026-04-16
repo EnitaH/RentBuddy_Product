@@ -43,7 +43,7 @@ The platform focuses on real user experiences, helping students and young profes
 ### Contact Landlord
 * Submit inquiries about properties
 * Stores inquiries in the database
-* (Optional) Email confirmation system
+* Email confirmation system
 ## Tech Stack
 ### Frontend
 * React
@@ -110,10 +110,9 @@ npm run seed:reviews
 ## Key Learning Outcomes
 * Built a full-stack application using React and Express
 * Designed and implemented a relational database (SQLite)
-* Developed a RESTful API architecture
 * Implemented user authentication and profile management
-* Handled file uploads (Base64 image storage)
-* Integrated email functionality using Nodemailer
+* Handled file uploads 
+* Integrated email functionality using Mailto
 * Improved UI/UX with responsive design principles
 ## Authors
 ### Nora Lengyel
